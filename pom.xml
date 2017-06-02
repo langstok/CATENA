@@ -59,9 +59,9 @@
             <version>3.5</version>
         </dependency>
         <dependency>
-            <groupId>de.sciss</groupId>
+            <groupId>edu.cmu.lti.ws4j</groupId>
             <artifactId>ws4j</artifactId>
-            <version>0.1.0</version>
+            <version>1.0.1</version>
         </dependency>
     </dependencies>
 </project>
