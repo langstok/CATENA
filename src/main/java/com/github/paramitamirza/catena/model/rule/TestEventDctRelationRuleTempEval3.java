@@ -1,0 +1,70 @@
+package com.github.paramitamirza.catena.model.rule;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.github.paramitamirza.catena.ParserConfig;
+import com.github.paramitamirza.catena.evaluator.PairEvaluator;
+import com.github.paramitamirza.catena.model.CandidateLinks;
+import com.github.paramitamirza.catena.parser.ColumnParser;
+import com.github.paramitamirza.catena.parser.TimeMLParser;
+import com.github.paramitamirza.catena.parser.TimeMLToColumns;
+import com.github.paramitamirza.catena.parser.entities.Doc;
+import com.github.paramitamirza.catena.parser.entities.EntityEnum;
+
+public class TestEventDctRelationRuleTempEval3 {
+	
+	public TestEventDctRelationRuleTempEval3() {
+		
+	}
+	
+	public List<String> getEventTimexTlinks(String tmlDirpath, 
+			TimeMLToColumns tmlToCol, ColumnParser colParser, 
+			boolean goldCandidate) throws Exception {
+		
+		List<String> et = new ArrayList<String>();
+		
+		File[] tmlFiles = new File(tmlDirpath).listFiles();
+		for (File tmlFile : tmlFiles) {	//assuming that there is no sub-directory
+			
+			if (tmlFile.getName().contains(".tml")) {
+				System.out.println("Processing " + tmlFile.getPath());
+				
+				// File pre-processing...
+				List<String> columns = tmlToCol.convert(tmlFile, true);
+				Doc doc = colParser.parseLines(columns);
+				TimeMLParser.parseTimeML(tmlFile, doc);
+				CandidateLinks.setCandidateTlinks(doc);
+							
+				// Applying rules...	
+				List<String> etPerFile = EventTimexTemporalRule.getEventDctTlinksPerFile(doc, goldCandidate);
+				et.addAll(etPerFile);
+				
+				// Evaluate the results...
+				PairEvaluator pe = new PairEvaluator(etPerFile);
+				pe.printIncorrectAndSentence(doc);
+			}
+		}		
+		return et;
+	}
+
+	public static void main(String [] args) throws Exception {
+		
+		// Init the parsers...
+		TimeMLToColumns tmlToCol = new TimeMLToColumns(ParserConfig.textProDirpath, 
+				ParserConfig.mateLemmatizerModel, ParserConfig.mateTaggerModel, ParserConfig.mateParserModel);
+		ColumnParser colParser = new ColumnParser(EntityEnum.Language.EN);
+		
+		// Apply event-timex rules to the TimeML (.tml) files...
+		String tmlDirpath = "./data/TempEval3-eval_TML/";
+		boolean goldCandidate = true;
+		TestEventDctRelationRuleTempEval3 test = new TestEventDctRelationRuleTempEval3();
+		List<String> etResult = test.getEventTimexTlinks(tmlDirpath, tmlToCol, colParser, goldCandidate);
+
+		// Evaluate the results...
+		PairEvaluator pe = new PairEvaluator(etResult);
+		pe.evaluatePerLabel(); 
+		
+	}
+}
