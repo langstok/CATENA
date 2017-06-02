@@ -7,7 +7,12 @@ import java.util.Map;
 import com.github.paramitamirza.catena.Temporal;
 import com.github.paramitamirza.catena.evaluator.PairEvaluator;
 import com.github.paramitamirza.catena.parser.entities.TLINK;
+import org.junit.runner.RunWith;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 
+@RunWith(SpringRunner.class)
+@EnableAutoConfiguration
 public class EvaluateTraditionalFeatures {
 
 	public static void main(String[] args) throws Exception {	

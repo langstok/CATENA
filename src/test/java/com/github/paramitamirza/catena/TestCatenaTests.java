@@ -8,8 +8,14 @@ import com.github.paramitamirza.catena.evaluator.PairEvaluator;
 import com.github.paramitamirza.catena.parser.entities.CLINK;
 import com.github.paramitamirza.catena.parser.entities.TLINK;
 import com.github.paramitamirza.catena.parser.entities.TemporalRelation;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 
-public class TestCatena {
+@RunWith(SpringRunner.class)
+@EnableAutoConfiguration
+public class TestCatenaTests {
 
 	//TODO use property file
 	private static final String dataPath = "C:\\cfn\\git\\paramitamirza\\CATENA\\data\\";
@@ -24,7 +30,8 @@ public class TestCatena {
 	private static String causalTimeBankPath = dataPath + "Causal-TimeBank_TML/";
 
 
-	public static void main(String[] args) throws Exception {
+	@Test
+	public void runTest() throws Exception {
 
 		String task = "tbdense";
 		boolean colFilesAvailable = true;
