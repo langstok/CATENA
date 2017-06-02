@@ -15,9 +15,11 @@ public class TestCatena {
 	private static final String dataPath = "C:\\cfn\\git\\paramitamirza\\CATENA\\data\\";
 	private static final String modelPath = "C:\\cfn\\git\\paramitamirza\\CATENA\\models\\";
 
-	private static String tlinkPath = dataPath + "TimebankDense.T3.txt";
-	private static String tempEval3Path = dataPath + "TempEval3-eval_TML/";
-	private static String tempTrain3Path = dataPath + "TempEval3-train_TML/";
+	private static String tlinkDensePath = dataPath + "TimebankDense.T3.txt";
+	private static String clinkEval3Path = dataPath + "Causal-TempEval3-eval.txt";
+
+	private static String tempEval3EvalPath = dataPath + "TempEval3-eval_TML/";
+	private static String tempEval3TrainPath = dataPath + "TempEval3-train_TML/";
 
 	private static String causalTimeBankPath = dataPath + "Causal-TimeBank_TML/";
 
@@ -69,17 +71,17 @@ public class TestCatena {
 			relTypeMappingTrain.put("DURING_INV", "SIMULTANEOUS");
 			relTypeMappingTrain.put("IBEFORE", "BEFORE");
 			relTypeMappingTrain.put("IAFTER", "AFTER");
-			temp.trainModels(taskName, tempTrain3Path, te3CLabelCollapsed, relTypeMappingTrain, colFilesAvailable);
+			temp.trainModels(taskName, tempEval3TrainPath, te3CLabelCollapsed, relTypeMappingTrain, colFilesAvailable);
 		}
 
 		// PREDICT
 		Map<String, String> relTypeMapping = new HashMap<String, String>();
 		relTypeMapping.put("IDENTITY", "SIMULTANEOUS");
-		List<TLINK> tlinks = temp.extractRelations(taskName, "./data/TempEval3-eval_TML/", te3CLabelCollapsed, relTypeMapping, colFilesAvailable);
+		List<TLINK> tlinks = temp.extractRelations(taskName, tempEval3EvalPath, te3CLabelCollapsed, relTypeMapping, colFilesAvailable);
 
 		// ---------- CAUSAL ---------- //
 
-		Map<String, Map<String, String>> clinkPerFile = Causal.getCausalTempEval3EvalTlinks("./data/Causal-TempEval3-eval.txt");
+		Map<String, Map<String, String>> clinkPerFile = Causal.getCausalTempEval3EvalTlinks(clinkEval3Path);
 
 		String[] causalLabel = {"CLINK", "CLINK-R", "NONE"};
 
@@ -133,10 +135,10 @@ public class TestCatena {
 				tlinksForClinkPerFile.get(cols[0]).put(cols[1]+","+cols[2], label);
 				tlinksForClinkPerFile.get(cols[0]).put(cols[2]+","+cols[1], TemporalRelation.getInverseRelation(label));
 			}
-			clinks = causal.extractRelations(taskName, tempEval3Path, clinkPerFile, causalLabel,
+			clinks = causal.extractRelations(taskName, tempEval3EvalPath, clinkPerFile, causalLabel,
 					cat.isTlinkFeature(), tlinksForClinkPerFile, te3CLabelCollapsed, colFilesAvailable);
 		} else {
-			clinks = causal.extractRelations(taskName, tempEval3Path, clinkPerFile, causalLabel, colFilesAvailable);
+			clinks = causal.extractRelations(taskName, tempEval3EvalPath, clinkPerFile, causalLabel, colFilesAvailable);
 		}
 
 
@@ -227,7 +229,7 @@ public class TestCatena {
 				"NYT19980206.0466.tml"
 		};
 
-		Map<String, Map<String, String>> tlinkPerFile = Temporal.getTimeBankDenseTlinks(tlinkPath);
+		Map<String, Map<String, String>> tlinkPerFile = Temporal.getTimeBankDenseTlinks(tlinkDensePath);
 
 		String taskName = "tbdense";
 		Catena cat = new Catena(true, true);
@@ -253,7 +255,7 @@ public class TestCatena {
 		if (train) {
 			System.err.println("Train temporal model...");
 
-			temp.trainModels(taskName, tempTrain3Path, trainDocs, tlinkPerFile, tbDenseLabel, colFilesAvailable);
+			temp.trainModels(taskName, tempEval3TrainPath, trainDocs, tlinkPerFile, tbDenseLabel, colFilesAvailable);
 		}
 
 		// PREDICT
@@ -265,16 +267,16 @@ public class TestCatena {
 		relTypeMapping.put("ENDED_BY", "BEFORE");
 		relTypeMapping.put("DURING", "SIMULTANEOUS");
 		relTypeMapping.put("DURING_INV", "SIMULTANEOUS");
-		List<TLINK> tlinks = temp.extractRelations(taskName, tempTrain3Path, testDocs, tlinkPerFile, tbDenseLabel, relTypeMapping, colFilesAvailable);
+		List<TLINK> tlinks = temp.extractRelations(taskName, tempEval3TrainPath, testDocs, tlinkPerFile, tbDenseLabel, relTypeMapping, colFilesAvailable);
 
 		// ---------- CAUSAL ---------- //
 
-		Map<String, Map<String, String>> clinkPerFile = Causal.getCausalTempEval3EvalTlinks(tempEval3Path);
+		Map<String, Map<String, String>> clinkPerFile = Causal.getCausalTempEval3EvalTlinks(clinkEval3Path);
 
 		String[] causalLabel = {"CLINK", "CLINK-R", "NONE"};
 
 		Causal causal = new Causal(
-				"./models/" + taskName + "-causal-event-event.model",
+				modelPath + taskName + "-causal-event-event.model",
 				true, true);
 
 		// TRAIN
