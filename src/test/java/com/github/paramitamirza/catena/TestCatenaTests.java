@@ -18,8 +18,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class TestCatenaTests {
 
 	//TODO use property file
-	private static final String dataPath = "C:\\cfn\\git\\paramitamirza\\CATENA\\data\\";
-	private static final String modelPath = "C:\\cfn\\git\\paramitamirza\\CATENA\\models\\";
+	private static final String dataPath = ".\\data\\";
+	private static final String modelPath = ".\\models\\";
 
 	private static String tlinkDensePath = dataPath + "TimebankDense.T3.txt";
 	private static String clinkEval3Path = dataPath + "Causal-TempEval3-eval.txt";
