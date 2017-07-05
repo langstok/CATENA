@@ -1019,4 +1019,110 @@ public class Temporal {
 			dir.mkdirs();
 		}
 	}
+
+
+
+
+	public List<TLINK> extractRelationsDoc(String taskName, Doc doc, String[] labels,
+										Map<String, String> relTypeMapping) throws Exception {
+
+		List<TLINK> resultList = new ArrayList<TLINK>();
+
+		//doc is tml parsed to col
+		//docSieved is col file (normally without events)
+		Doc docSieved = doc;
+
+		// Applying temporal rules...
+		List<String> ttRule = TimexTimexTemporalRule.getTimexTimexTlinksPerFile(doc, this.isGoldCandidate());
+		List<String> edRule = new ArrayList<String>();
+		List<String> etRule = new ArrayList<String>();
+		List<String> eeRule = new ArrayList<String>();
+
+		if (isRuleSieve()) {
+			edRule = EventTimexTemporalRule.getEventDctTlinksPerFile(doc, this.isGoldCandidate());
+			etRule = EventTimexTemporalRule.getEventTimexTlinksPerFile(doc, this.isGoldCandidate());
+			eeRule = EventEventTemporalRule.getEventEventTlinksPerFile(doc, this.isGoldCandidate());
+		}
+		/*tmlString = TimeMLDoc.timeMLFileToString(doc, tmlFile,
+				ttRule, edRule, etRule, eeRule);*/
+
+		//Applying temporal reasoner...
+//		if (isReasoner()) {
+//			Reasoner r = new Reasoner();
+//			tmlString = r.deduceTlinksPerFile(tmlString);
+//		}
+
+		//Applying temporal classifiers...
+		if (isClassifierSieve()) {
+
+			// Init the classifier...
+			EventDctTemporalClassifier edCls = new EventDctTemporalClassifier(taskName, "liblinear");
+			EventTimexTemporalClassifier etCls = new EventTimexTemporalClassifier(taskName, "liblinear");
+			EventEventTemporalClassifier eeCls = new EventEventTemporalClassifier(taskName, "liblinear");
+
+			//Init the feature vectors...
+			Map<String, String> ttlinks = null, etlinks = null;
+			if (isTTFeature()) ttlinks = TimexTimexTemporalRule.getTimexTimexRuleRelation(doc);
+			if (isETFeature()) etlinks = doc.getTlinkTypes();
+
+			List<PairFeatureVector> edFv = EventDctTemporalClassifier.getEventDctTlinksPerFile(doc, edCls,
+					false, isGoldCandidate(), Arrays.asList(labels));
+			List<PairFeatureVector> etFv = EventTimexTemporalClassifier.getEventTimexTlinksPerFile(doc, etCls,
+					false, isGoldCandidate(), Arrays.asList(labels), ttlinks);
+			List<PairFeatureVector> eeFv = EventEventTemporalClassifier.getEventEventTlinksPerFile(doc, eeCls,
+					false, isGoldCandidate(), Arrays.asList(labels), etlinks);
+
+			List<String> edClsLabels = edCls.predict(edFv, getEDModelPath(), labels);
+			List<String> etClsLabels = etCls.predict(etFv, getETModelPath(), labels);
+			List<String> eeClsLabels = eeCls.predict(eeFv, getEEModelPath(), labels);
+
+			if (isRuleSieve()) {
+
+				for (int i = 0; i < edFv.size(); i ++) {
+					//Find label according to rules
+					EventTimexFeatureVector etfv = new EventTimexFeatureVector(edFv.get(i));
+					if (!docSieved.getTlinkTypes().containsKey(etfv.getE1().getID() + "," + etfv.getE2().getID())
+							&& !docSieved.getTlinkTypes().containsKey(etfv.getE2().getID() + "," + etfv.getE1().getID())) {
+						docSieved.getTlinks().add(new TemporalRelation(etfv.getE1().getID(), etfv.getE2().getID(), edClsLabels.get(i)));
+					}
+				}
+				for (int i = 0; i < etFv.size(); i ++) {
+					//Find label according to rules
+					EventTimexFeatureVector etfv = new EventTimexFeatureVector(etFv.get(i));
+					if (!docSieved.getTlinkTypes().containsKey(etfv.getE1().getID() + "," + etfv.getE2().getID())
+							&& !docSieved.getTlinkTypes().containsKey(etfv.getE2().getID() + "," + etfv.getE1().getID())) {
+						docSieved.getTlinks().add(new TemporalRelation(etfv.getE1().getID(), etfv.getE2().getID(), etClsLabels.get(i)));
+					}
+				}
+				for (int i = 0; i < eeFv.size(); i ++) {
+					//Find label according to rules
+					EventEventFeatureVector eefv = new EventEventFeatureVector(eeFv.get(i));
+					if (!docSieved.getTlinkTypes().containsKey(eefv.getE1().getID() + "," + eefv.getE2().getID())
+							&& !docSieved.getTlinkTypes().containsKey(eefv.getE2().getID() + "," + eefv.getE1().getID())) {
+						docSieved.getTlinks().add(new TemporalRelation(eefv.getE1().getID(), eefv.getE2().getID(), eeClsLabels.get(i)));
+					}
+				}
+
+			} else {
+				for (int i = 0; i < edFv.size(); i ++) {
+					EventTimexFeatureVector etfv = new EventTimexFeatureVector(edFv.get(i));
+					docSieved.getTlinks().add(new TemporalRelation(etfv.getE1().getID(), etfv.getE2().getID(), edClsLabels.get(i)));
+				}
+				for (int i = 0; i < etFv.size(); i ++) {
+					EventTimexFeatureVector etfv = new EventTimexFeatureVector(etFv.get(i));
+					docSieved.getTlinks().add(new TemporalRelation(etfv.getE1().getID(), etfv.getE2().getID(), etClsLabels.get(i)));
+				}
+				for (int i = 0; i < eeFv.size(); i ++) {
+					EventEventFeatureVector eefv = new EventEventFeatureVector(eeFv.get(i));
+					docSieved.getTlinks().add(new TemporalRelation(eefv.getE1().getID(), eefv.getE2().getID(), eeClsLabels.get(i)));
+				}
+			}
+		}
+
+		// Temporal links to string
+		resultList.add(relationToString(doc, docSieved, relTypeMapping));
+
+		return resultList;
+	}
+
 }
