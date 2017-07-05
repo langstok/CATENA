@@ -9,12 +9,22 @@ import com.github.paramitamirza.catena.parser.TimeMLParser;
 import com.github.paramitamirza.catena.parser.entities.Doc;
 import com.github.paramitamirza.catena.parser.entities.EntityEnum;
 import com.github.paramitamirza.catena.parser.entities.TLINK;
+import eu.fbk.newsreader.naf.NAFtoTXP;
+import ixa.kaflib.KAFDocument;
+import org.jdom2.JDOMException;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.xml.sax.SAXException;
 
+import javax.xml.bind.JAXBException;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -97,6 +107,21 @@ public class SingleDocTest {
 
 
 
+    }
+
+    @Test
+    @Ignore //perl???
+    public void kafConversion() throws IOException, InterruptedException, ParserConfigurationException, SAXException, JDOMException, JAXBException, URISyntaxException {
+        File file = new File(SingleDocTest.this.getClass().getResource("/wikinews_1173_en.naf").getFile());
+        KAFDocument nafFile = KAFDocument.createFromFile(file);
+        boolean writePos = true;
+        String[] listCol = new String[]{};
+        String nameFile = "./outputtest.txp";
+        String typeCorpus = "timex";
+
+        logger.info(nafFile.toString());
+
+        NAFtoTXP.NAF2TXP(nafFile, writePos, listCol, nameFile, typeCorpus);
     }
 
 
