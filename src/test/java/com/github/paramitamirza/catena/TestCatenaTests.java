@@ -33,7 +33,7 @@ public class TestCatenaTests {
 	@Test
 	public void runTest() throws Exception {
 
-		String task = "tbdense";
+		String task = "te3";
 		boolean colFilesAvailable = true;
 		boolean train = true;
 

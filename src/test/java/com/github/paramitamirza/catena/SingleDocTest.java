@@ -110,18 +110,20 @@ public class SingleDocTest {
     }
 
     @Test
-    @Ignore //perl???
     public void kafConversion() throws IOException, InterruptedException, ParserConfigurationException, SAXException, JDOMException, JAXBException, URISyntaxException {
         File file = new File(SingleDocTest.this.getClass().getResource("/wikinews_1173_en.naf").getFile());
         KAFDocument nafFile = KAFDocument.createFromFile(file);
         boolean writePos = true;
-        String[] listCol = new String[]{};
+        String[] listCol = new String[]{"token","tokenid","sentid","POS","lemma","dep","timex_id","timex_type","timex_value","entity","pred_class","event_id","role1","role2","role3","is_arg_pred","has_semrole","chunk","main_verb","connectives","morpho","tense+aspect+pol"};
+
         String nameFile = "./outputtest.txp";
         String typeCorpus = "timex";
 
-        logger.info(nafFile.toString());
+        String[][] result = NAFtoTXP.NAF2TXP(nafFile, writePos, listCol, nameFile, typeCorpus);
+        for(String[] line : result){
+            logger.info(Arrays.asList(line).toString());
+        }
 
-        NAFtoTXP.NAF2TXP(nafFile, writePos, listCol, nameFile, typeCorpus);
     }
 
 
