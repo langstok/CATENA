@@ -1,6 +1,21 @@
-# CATENA
+# CATENA*
 ## CAusal and TEmporal relation extraction from NAtural language texts 
 CATENA is a sieve-based system to perform temporal and causal relation extraction and classification from English texts, exploiting the interaction between the temporal and the causal model. The system requires pre-annotated text with EVENT and TIMEX3 tags according to the TimeML annotation standard, as these annotation are used as features to extract the relations.
+
+###* LANGSTOK fork
+This fork of CATENA has been created for the following reasons: 
+
+- Integration with the newsreader pipeline 
+- Gain performance (speed)
+
+**THIS FORK IS ON HOLD** (for now): 
+
+The following dependencies are non Java and therefore hard to optimize
+
+- CATENA (NAFtoTXP) depends on TextPro [MORPHOLOGICAL ANALYSIS](http://textpro.fbk.eu/modules/morphopro) (unknown OS dependent fstan)
+- CATENA (NAFtoTXP) depends on [Discourse Connectives Tagger](http://www.cis.upenn.edu/~nlp/software/discourse.html) (Perl)
+
+
 
 ###Requirements
 * Java Runtime Environment (JRE) 1.7.x or higher
